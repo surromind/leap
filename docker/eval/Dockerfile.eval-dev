@@ -10,10 +10,7 @@ RUN \
     apt-get install -y nano curl wget gcc build-essential sudo
 
 WORKDIR /home/leap
-COPY ./evaluation ./evaluation
 COPY ./docker/eval/requirements.txt .
-# PyPI 에서 yank 된 pyairports==2.1.1 을 로컬 wheel 로 제공 (동작 이미지에서 추출해 vendoring)
-COPY ./docker/eval/vendor ./vendor
 
 # Install miniconda3
 ENV PATH="/root/miniconda3/bin:${PATH}"
@@ -25,11 +22,9 @@ RUN wget \
     && rm -f Miniconda3-latest-Linux-x86_64.sh 
 RUN conda --version
 RUN conda env list
-RUN /bin/bash -c "conda init"
-# 최신 miniconda 는 default 채널 Terms of Service 동의를 요구함 (구버전 이미지 빌드 당시엔 없던 최근 Anaconda 정책 변경)
-RUN /bin/bash -c "conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main && conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r"
-RUN /bin/bash -c "conda create -n vllm python=3.10 -y"
-RUN /bin/bash -c "source activate vllm && pip install torch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 --index-url https://download.pytorch.org/whl/cu121 && pip install --find-links /home/leap/vendor -r requirements.txt && pip install 'git+https://github.com/huggingface/transformers.git'"
+RUN /bin/bash -c "conda init" 
+RUN /bin/bash -c "conda create -n vllm python=3.10 -y" 
+RUN /bin/bash -c "source activate vllm && pip install torch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 --index-url https://download.pytorch.org/whl/cu121 && pip install -r requirements.txt && pip install 'git+https://github.com/huggingface/transformers.git'" 
 RUN /bin/bash -c "source activate vllm && pip install vllm==0.8.5"
 
 ENV HOST=10.10.20.66

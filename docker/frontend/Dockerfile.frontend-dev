@@ -1,0 +1,17 @@
+FROM python:3.10-slim
+
+WORKDIR /home/leap
+COPY ./docker/frontend/requirements.txt .
+
+RUN pip install -r requirements.txt
+RUN pip install gradio==5.5.0
+RUN pip install pydantic==2.10.6
+
+ENV HOST=10.10.20.66
+ENV BACKEND_PORT=11188
+ENV EVAL_PORT=11189
+ENV TUNING_PORT=11190
+ENV FRONTEND_PORT=11191
+EXPOSE 11191
+
+#CMD ["python", "/home/leap/webui/webui.py"]

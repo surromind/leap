@@ -131,12 +131,20 @@ async def get_list(
 @app.get("/dataset/sample/{dataset_name}")
 async def get_data_sample(dataset_name: str):
     dataset_name = dataset_name.replace("$", "/")
-    file_path = get_tuning_datasets()[dataset_name]
-    with open(file_path, "r", encoding="utf-8", errors="ignore") as file:
-        data = json.load(file)
-    random.shuffle(data)
-
-    return {"sample": data[0:3]}
+    # 존재하지 않는 데이터셋명이 와도 500(KeyError) 대신 빈 샘플을 반환해
+    # 프론트엔드의 response.json() 이 깨지지 않도록 한다.
+    file_path = get_tuning_datasets().get(dataset_name)
+    if not file_path or not os.path.exists(file_path):
+        return {"sample": [], "error": f"dataset not found: {dataset_name}"}
+    try:
+        with open(file_path, "r", encoding="utf-8", errors="ignore") as file:
+            data = json.load(file)
+    except Exception as e:
+        return {"sample": [], "error": f"failed to read dataset: {e}"}
+    if isinstance(data, list):
+        random.shuffle(data)
+        return {"sample": data[0:3]}
+    return {"sample": data}
 
 
 @app.post("/dataset/upload")

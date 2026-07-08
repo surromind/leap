@@ -60,24 +60,23 @@ def hf_down(repo, save_path):
 def download_model(model_dir, model_name):
     path = os.path.join(model_dir, model_name)
     try:
-        # login(token=os.getenv("HF_TOKEN", HF_TOKEN))
-        login(token=os.getenv("HF_TOKEN", "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"))
-        processes = [
-            Process(
-                target=hf_down,
-                args=(
-                    model_name,
-                    path,
-                ),
-            ),
-        ]
-
-        for process in processes:
-            process.start()
-
-        for process in processes:
-            process.join()
+        # HF_TOKEN 이 유효하지 않아도 공개 모델은 익명으로 다운로드 가능하므로 login 실패는 무시한다.
+        # (예전엔 무효 토큰으로 login 이 예외를 던져 공개 모델 다운로드까지 막았다. gated 모델을
+        #  받으려면 유효한 HF_TOKEN 을 환경변수/Dockerfile 에 설정해야 한다.)
+        token = os.getenv("HF_TOKEN")
+        if token:
+            try:
+                login(token=token)
+            except Exception as login_err:
+                print(f"HF login 실패, 익명 다운로드로 계속 진행: {login_err}")
+        # NOTE: 예전에는 hf_down 을 별도 Process 로 감쌌으나, 이 함수 자체가 이미
+        # eval 서브프로세스(Process(target=eval)) 안에서 호출되어 중첩 fork 로
+        # 다운로드가 조용히 실패했고, 부모는 실패를 삼킨 채 넘어가 vLLM 이 빈 경로를
+        # 로드하다 "Can't load configuration" 으로 죽었다. 직접 호출하고 실패 시
+        # 예외를 전파해 상위(evaluate.py)에서 명확한 에러로 처리하도록 한다.
+        hf_down(model_name, path)
     except Exception as e:
         print(e)
         if os.path.exists(path):
-            shutil.rmtree(os.path.join(model_dir, model_name))
+            shutil.rmtree(path)
+        raise

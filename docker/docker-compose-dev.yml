@@ -7,9 +7,10 @@ services:
     ports:
     - 11188:11188
     volumes:
-      - ../local_store/llm_models/:/home/llm_models/ 
-      - ../local_store/llm_data/:/home/data/ 
+      - /mnt/seaweedfs/llm_models/:/home/llm_models/ 
+      - /mnt/seaweedfs/llm_data/:/home/data/ 
       - ../data/:/home/leap/data/
+      - ../api/:/home/leap/api/
     stdin_open: true
     tty: true
     deploy:
@@ -33,6 +34,7 @@ services:
     - 11191:11191
     volumes:
     - ../logs/:/home/leap/logs/
+    - ../webui/:/home/leap/webui/
     stdin_open: true   # -it 옵션 활성화
     tty: true          # -it 옵션 활성화
     restart: unless-stopped
@@ -47,9 +49,10 @@ services:
     ports:
     - 11189:11189
     volumes:
-      - ../local_store/llm_models/:/home/llm_models/ 
-      - ../local_store/llm_data/:/home/data/
+      - /mnt/seaweedfs/llm_models/:/home/llm_models/ 
+      - /mnt/seaweedfs/llm_data/:/home/data/
       - ../logs/:/home/leap/logs/
+      - ../evaluation/:/home/leap/evaluation/
     stdin_open: true
     tty: true
     deploy:
@@ -61,8 +64,6 @@ services:
             capabilities: [gpu]
     restart: unless-stopped
     #command: /bin/bash -c "source activate vllm && uvicorn evaluation.app:app --host 0.0.0.0 --port 11184 --reload"
-    environment:
-      - HF_TOKEN=${HF_TOKEN}
     command: /bin/bash -c "source activate vllm && python evaluation/app_eval.py"
 
   leap-tuning:
@@ -73,9 +74,10 @@ services:
     ports:
     - 11190:11190
     volumes:
-      - ../local_store/llm_models/:/home/llm_models/ 
-      - ../local_store/llm_data/:/home/data/
+      - /mnt/seaweedfs/llm_models/:/home/llm_models/ 
+      - /mnt/seaweedfs/llm_data/:/home/data/
       - ../logs/:/home/leap/logs/
+      - ../tuning/:/home/leap/tuning/
     stdin_open: true
     tty: true
     deploy:
@@ -87,6 +89,4 @@ services:
             capabilities: [gpu]
     restart: unless-stopped
     #command: /bin/bash -c "source activate vllm && uvicorn evaluation.app:app --host 0.0.0.0 --port 11184 --reload"
-    environment:
-      - HF_TOKEN=${HF_TOKEN}
     command: /bin/bash -c "source activate vllm && python tuning/app_tuning.py"

@@ -1,0 +1,5 @@
+local_store/
+.git/
+logs/
+**/__pycache__/
+*.pyc

@@ -1,0 +1,21 @@
+[2025-06-27 09:40:44]-[INFO|evaluate.py:37]-[Task 20250627-004044-Qwen2-0.5B 작업 시작]
+[2025-06-27 09:40:44]-[INFO|evaluator.py:49]-[데이터셋 ['kobest_hellaswag'] 로드 시작]
+[2025-06-27 09:40:44]-[INFO|evaluator.py:51]-[데이터셋 ['kobest_hellaswag'] 로드 완료]
+[2025-06-27 09:40:44]-[INFO|evaluator.py:75]-[데이터셋: kobest_hellaswag (500)]
+[2025-06-27 09:40:44]-[INFO|evaluator.py:98]-[Task: kobest_hellaswag; document 0; context prompt (starting on next line):
+얼굴에 여드름이 난 여성이 거울 앞에 서있다. 여성이 거울 가까이에 얼굴을 대고 여드름을 바라본다.여성이 거울에서 물러나 면봉 두 개를 양 손으로 쥔다.
+(end of prompt on previous line)]
+[2025-06-27 09:40:44]-[INFO|evaluator.py:101]-[Requests: [Req_loglikelihood('얼굴에 여드름이 난 여성이 거울 앞에 서있다. 여성이 거울 가까이에 얼굴을 대고 여드름을 바라본다.여성이 거울에서 물러나 면봉 두 개를 양 손으로 쥔다.', ' 여성이 면봉으로 여드름 주변을 누른다.')[0]
+, Req_loglikelihood('얼굴에 여드름이 난 여성이 거울 앞에 서있다. 여성이 거울 가까이에 얼굴을 대고 여드름을 바라본다.여성이 거울에서 물러나 면봉 두 개를 양 손으로 쥔다.', ' 여성이 여드름이 터져 나오는 피를 면봉으로 닦아낸다.')[0]
+, Req_loglikelihood('얼굴에 여드름이 난 여성이 거울 앞에 서있다. 여성이 거울 가까이에 얼굴을 대고 여드름을 바라본다.여성이 거울에서 물러나 면봉 두 개를 양 손으로 쥔다.', ' 여드름이 터진다.')[0]
+, Req_loglikelihood('얼굴에 여드름이 난 여성이 거울 앞에 서있다. 여성이 거울 가까이에 얼굴을 대고 여드름을 바라본다.여성이 거울에서 물러나 면봉 두 개를 양 손으로 쥔다.', ' 면봉 두 개를 여드름 가까이에 가져간다.')[0]
+]]
+[2025-06-27 09:40:44]-[INFO|evaluator.py:131]-[모델 Qwen/Qwen2-0.5B 로드 시작]
+[2025-06-27 09:40:44]-[INFO|vllm.py:63]-[{
+  "model": "/home/llm_models/Qwen/Qwen2-0.5B",
+  "trust_remote_code": true,
+  "max_model_len": 3072,
+  "tensor_parallel_size": 2,
+  "gpu_memory_utilization": 0.9,
+  "max_num_seqs": 64
+}]

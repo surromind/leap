@@ -1,0 +1,37 @@
+FROM nvidia/cuda:12.1.0-cudnn8-devel-ubuntu20.04
+# 타임존 설정
+RUN ln -snf /usr/share/zoneinfo/Asia/Seoul /etc/localtime
+# 필요한 패키지 설치 
+RUN apt-get update && apt-get install -y locales git wget net-tools vim openssh-server awscli
+# 한글 설정
+RUN localedef -f UTF-8 -i ko_KR ko_KR.UTF-8
+RUN \    
+    apt-get update && \
+    apt-get install -y nano curl wget gcc build-essential sudo
+
+WORKDIR /home/leap
+COPY ./docker/tuning/requirements.txt .
+
+# Install miniconda3
+ENV PATH="/root/miniconda3/bin:${PATH}"
+ARG PATH="/root/miniconda3/bin:${PATH}"
+RUN wget \
+    https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
+    && mkdir /root/.conda \
+    && bash Miniconda3-latest-Linux-x86_64.sh -b \
+    && rm -f Miniconda3-latest-Linux-x86_64.sh 
+RUN conda --version
+RUN conda env list
+RUN /bin/bash -c "conda init" 
+RUN /bin/bash -c "conda create -n vllm python=3.10 -y" 
+RUN /bin/bash -c "source activate vllm && pip install torch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 --index-url https://download.pytorch.org/whl/cu121 && pip install -r requirements.txt" 
+
+
+ENV HOST=10.10.20.66
+ENV BACKEND_PORT=11188
+ENV EVAL_PORT=11189
+ENV TUNING_PORT=11190
+ENV FRONTEND_PORT=11191
+EXPOSE 11190
+    
+#ENTRYPOINT ["/bin/bash", "-c", "source activate vllm && exec \"$@\"", "--"]

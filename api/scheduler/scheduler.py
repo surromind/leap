@@ -109,7 +109,15 @@ class Scheduler:
                     headers={"Content-Type": "application/json"},
                     data=json.dumps(input),
                 )
-                result = result.json()
+                # 작업 서버가 비정상(500 등, non-JSON) 응답을 줘도
+                # 스케줄러 프로세스가 죽지 않도록 방어
+                try:
+                    result = result.json()
+                except Exception:
+                    result = {
+                        "error": f"HTTP {result.status_code}",
+                        "detail": result.text[:1000],
+                    }
                 self.result_queue.put((task_id, result))
 
             # 진행 중이었던 작업이 완료된 경우

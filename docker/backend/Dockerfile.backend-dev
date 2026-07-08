@@ -1,0 +1,15 @@
+FROM python:3.10-slim
+
+WORKDIR /home/leap
+COPY ./docker/backend/requirements.txt .
+
+
+RUN pip install -r requirements.txt
+
+ENV HOST=10.10.20.66
+ENV BACKEND_PORT=11188
+ENV EVAL_PORT=11189
+ENV TUNING_PORT=11190
+ENV FRONTEND_PORT=11191
+
+EXPOSE 11188

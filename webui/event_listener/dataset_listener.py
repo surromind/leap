@@ -32,9 +32,20 @@ def select_eval_dataset(dataset):
 
 
 def select_tuning_dataset(dataset):
-    response = requests.get(API_URL + f"/dataset/sample/{dataset.replace('/', '$')}")
-    data = response.json()
-    return data["sample"]
+    # 드롭다운 값이 비어있거나(업로드 후 값 초기화 등) 백엔드 응답이 비정상일 때
+    # None.replace / response.json() 로 크래시하지 않도록 방어한다.
+    if not dataset:
+        return None
+    try:
+        response = requests.get(API_URL + f"/dataset/sample/{dataset.replace('/', '$')}")
+        if response.status_code != 200:
+            gr.Warning(f"데이터셋 미리보기를 불러올 수 없습니다: {dataset}")
+            return None
+        data = response.json()
+    except Exception as e:
+        gr.Warning(f"데이터셋 미리보기 오류: {e}")
+        return None
+    return data.get("sample")
 
 
 def upload_tuning_dataset(file_name, file):
@@ -72,9 +83,13 @@ def upload_tuning_dataset(file_name, file):
         gr.Info("데이터셋 저장에 성공했습니다!")
 
     TUNING_DATASETS = get_tuning_datasets()
+    # 백엔드가 리스트에 쓰는 키 형식("<폴더명>/<파일명>.json")으로 방금 올린 데이터셋을 선택값으로 지정.
+    # 값을 비운 채 반환하면 드롭다운 값이 None 이 되어 select_tuning_dataset 이 호출되며 크래시했다.
+    uploaded_key = os.path.join(os.path.basename(SAVE_DATASET_DIR), file_name + ".json")
     return (
         gr.Dropdown(
             choices=TUNING_DATASETS,
+            value=uploaded_key,
             label="Dataset",
             visible=True,
             interactive=True,

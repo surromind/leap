@@ -5,3 +5,5 @@
 .venv
 .pytest_cache
 __pycache__
+local_store/
+.env

@@ -1,6 +1,27 @@
 import os
 import gradio as gr
 
+# --- Fix: gradio_client 1.4.2 가 boolean JSON schema 값을 처리하지 못하는 문제 패치 ---
+# 최신 pydantic/fastapi 는 dict/Any 필드에 대해 `additionalProperties: true` 같은
+# boolean 스키마를 생성한다. gradio_client 의 스키마 파서가 이를 dict 로 가정하고
+# `"const" in schema` 를 수행하다 `TypeError: argument of type 'bool' is not iterable`
+# 를 일으키고, 그 결과 API 정보 생성(/ 라우트)이 500 을 반환 -> Gradio launch() 의
+# localhost self-check 실패 -> "When localhost is not accessible ..." ValueError 로
+# 프론트엔드 컨테이너가 재시작 루프에 빠진다. 아래 패치로 boolean 스키마를 안전하게 처리한다.
+import gradio_client.utils as _gc_utils
+
+_orig_json_schema_to_python_type = _gc_utils._json_schema_to_python_type
+
+
+def _patched_json_schema_to_python_type(schema, defs=None):
+    if isinstance(schema, bool):
+        return "bool" if schema else "Any"
+    return _orig_json_schema_to_python_type(schema, defs)
+
+
+_gc_utils._json_schema_to_python_type = _patched_json_schema_to_python_type
+# --- end fix ---
+
 from css import css
 from components import (
     tuning_tab,
@@ -22,7 +43,7 @@ from config import (
 
 def build_demo():
     with gr.Blocks(title="SURROMIND", css=css) as demo:
-        gr.Markdown("# Surro LLM Eval & PEFT <br><br>")
+        gr.Markdown("# LEAP <br><br>")
         EVAL_DATASETS = get_eval_datasets()
         TUNING_DATASETS = get_tuning_datasets()
         EVAL_MODELS = get_eval_models()

@@ -57,9 +57,25 @@ async def request(request: Request) -> Response:
     os.environ["NCCL_BLOCKING_WAIT"] = "1"
     os.environ["NCCL_ASYNC_ERROR_HANDLING"] = "1"
 
+    # 베이스 모델이 로컬에 없으면 허브에서 자동 다운로드 (seaweedfs 폐기로 모델이 미리
+    # 채워져 있지 않을 수 있음). 없을 경우 AutoTokenizer.from_pretrained 가 로컬 경로를
+    # 허브 repo_id 로 오해해 HFValidationError 로 죽는다. model_dir 이 args 에 없으므로
+    # 경로의 마지막 두 요소(namespace/model)로 repo_id 를 도출한다.
+    model_path = args.get("model")
+    if model_path and not os.path.exists(model_path):
+        repo_id = "/".join(model_path.rstrip("/").split("/")[-2:])
+        try:
+            from huggingface_hub import snapshot_download
+
+            print(f"[tuning] base model 로컬에 없음 -> 허브 다운로드: {repo_id} -> {model_path}")
+            snapshot_download(repo_id=repo_id, local_dir=model_path)
+            print(f"[tuning] base model 다운로드 완료: {model_path}")
+        except Exception as e:
+            print(f"[tuning] base model 다운로드 실패({repo_id}): {e}")
+
     # STEP 처리
     steps = ["convert_datasets", "run_tuning"]
-    steps.extend([f"run_merge_{idx}" for idx in range(args["num_train_epochs"])])
+    steps.extend([f"run_merge_{idx}" for idx in range(int(args["num_train_epochs"]))])
 
     # STEP별로 실행
     result = {step: "not running" for step in steps}

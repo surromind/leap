@@ -1,5 +1,6 @@
 deepspeed==0.15
-flash-attn==2.6.3
+# flash-attn==2.6.3 은 sdist 설치 시 소스 컴파일(60분+/OOM 위험)이라, Dockerfile 에서
+# GitHub prebuilt wheel 로 별도 설치한다.
 accelerate==1.0.1
 aiohappyeyeballs==2.4.3
 aiohttp==3.10.9

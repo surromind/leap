@@ -23,6 +23,13 @@ class Task(ABC):
     DOWNLOAD_OPTIONS: dict = (
         None  # 데이터셋 다운로드 옵션 (e.g., {"delimiter": "\t", "quoting": 3})
     )
+    # seaweedfs 로 제공되던 커스텀 데이터셋 폴더(bm_*)가 없을 때(또는 해당 config 가
+    # 로컬에 없을 때) 대신 로드할 공개 HF 허브 데이터셋 매핑. DATASET_PATH -> 허브 repo_id.
+    HF_HUB_FALLBACK: dict = {
+        "bm_kobest_v1": "skt/kobest_v1",
+        "bm_klue": "klue/klue",
+        "bm_ko-MMLU": "HAERAE-HUB/KMMLU",
+    }
 
     def __init__(self, data_dir: str = None, cache_dir=None):
         """
@@ -41,11 +48,24 @@ class Task(ABC):
         """
         # huggingface hub에 있는 데이터셋을 로드하는 경우
         if self.IN_HF_HUB:
-            self.dataset = datasets.load_dataset(
-                os.path.join(data_dir, self.DATASET_PATH),
-                self.DATASET_NAME,
-                cache_dir=cache_dir,
-            )  # 로컬 폴더명만 지정해도 load_dataset 가능
+            local_path = os.path.join(data_dir, self.DATASET_PATH)
+            try:
+                # 로컬에 재구성된 커스텀 데이터셋 폴더가 있으면 우선 사용 (오프라인/기존 방식)
+                self.dataset = datasets.load_dataset(
+                    local_path,
+                    self.DATASET_NAME,
+                    cache_dir=cache_dir,
+                )  # 로컬 폴더명만 지정해도 load_dataset 가능
+            except Exception as local_err:
+                # seaweedfs 커스텀 데이터셋이 없거나 해당 config 가 로컬에 없으면 공개 HF 허브로 fallback
+                fallback_repo = self.HF_HUB_FALLBACK.get(self.DATASET_PATH)
+                if not fallback_repo:
+                    raise local_err
+                self.dataset = datasets.load_dataset(
+                    fallback_repo,
+                    self.DATASET_NAME,
+                    cache_dir=cache_dir,
+                )
 
         # 로컬 데이터셋을 로드하는 경우
         else:
@@ -54,6 +74,7 @@ class Task(ABC):
             self.dataset = datasets.load_dataset(
                 self.DATASET_TYPE, data_files=data_files, **self.DOWNLOAD_OPTIONS
             )  # json 파일 경로 직접 지정
+    
 
     def n_shot(self):
         """데이터셋마다 적합한 fewshot 수 반환"""
