@@ -25,16 +25,17 @@ RUN wget \
     && rm -f Miniconda3-latest-Linux-x86_64.sh 
 RUN conda --version
 RUN conda env list
+RUN conda config --set channel_priority strict && \
+    conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main && \
+    conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
 RUN /bin/bash -c "conda init"
-# 최신 miniconda default 채널 Terms of Service 동의 (구버전 이미지 빌드 당시엔 없던 최근 Anaconda 정책 변경)
-RUN /bin/bash -c "conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main && conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r"
 RUN /bin/bash -c "conda create -n vllm python=3.10 -y"
 # flash-attn 은 소스 컴파일(60분+/OOM) 대신 GitHub prebuilt wheel(torch2.4/cu12/py310/cxx11abiFALSE) 사용.
 # yank 된 pyairports 는 --find-links(로컬 vendor)로 제공.
 RUN /bin/bash -c "source activate vllm && pip install torch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 --index-url https://download.pytorch.org/whl/cu121 && pip install https://github.com/Dao-AILab/flash-attention/releases/download/v2.6.3/flash_attn-2.6.3+cu123torch2.4cxx11abiFALSE-cp310-cp310-linux_x86_64.whl && pip install --find-links /home/leap/vendor -r requirements.txt"
 
 
-ENV HOST=10.10.20.66
+ENV HOST=10.10.20.24
 ENV BACKEND_PORT=11188
 ENV EVAL_PORT=11189
 ENV TUNING_PORT=11190

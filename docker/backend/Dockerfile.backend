@@ -7,7 +7,7 @@ COPY ./docker/backend/requirements.txt .
 
 RUN pip install -r requirements.txt
 
-ENV HOST=10.10.20.66
+ENV HOST=10.10.20.24
 ENV BACKEND_PORT=11188
 ENV EVAL_PORT=11189
 ENV TUNING_PORT=11190

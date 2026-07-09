@@ -167,5 +167,5 @@ if __name__ == "__main__":
     Process(target=scheduler.manage_tasks).start()
     # 서버 실행
     api_host = "0.0.0.0"
-    api_port = int(os.getenv("BACKEND_PORT", "11181"))
+    api_port = int(os.getenv("BACKEND_PORT", "11188"))
     uvicorn.run(app, host=api_host, port=api_port)

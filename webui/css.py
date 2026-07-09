@@ -48,5 +48,20 @@ table th:first-child {
     max-width: 85% !important;
 }
 
-
+.download-link {
+    display: block;
+    margin: 0 auto;
+    text-align: center;
+    padding: 10px 20px;
+    width: 150px;
+    background-color: #FFB366; 
+    color: white; 
+    border: none; 
+    border-radius: 8px; 
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
 """

@@ -124,5 +124,5 @@ async def request(request: Request) -> Response:
 if __name__ == "__main__":
     # 서버 실행
     api_host = "0.0.0.0"
-    api_port = int(os.getenv("TUNING_PORT", "11182"))
+    api_port = int(os.getenv("TUNING_PORT", "11190"))
     uvicorn.run(app, host=api_host, port=api_port)

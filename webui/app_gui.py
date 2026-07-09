@@ -1,5 +1,6 @@
 import os
 import gradio as gr
+from pathlib import Path
 
 # --- Fix: gradio_client 1.4.2 가 boolean JSON schema 값을 처리하지 못하는 문제 패치 ---
 # 최신 pydantic/fastapi 는 dict/Any 필드에 대해 `additionalProperties: true` 같은
@@ -40,10 +41,12 @@ from config import (
     get_tuning_models,
 )
 
-
 def build_demo():
     with gr.Blocks(title="SURROMIND", css=css) as demo:
         gr.Markdown("# LEAP <br><br>")
+        gr.HTML(f"""
+        <a href="https://raw.githubusercontent.com/surromind/leap/main/webui/LEAP_기능설명서.pdf" target="_blank" class="download-link">Manual PDF</a>
+        """)
         EVAL_DATASETS = get_eval_datasets()
         TUNING_DATASETS = get_tuning_datasets()
         EVAL_MODELS = get_eval_models()
@@ -110,5 +113,8 @@ if __name__ == "__main__":
         share=False,
         server_name="0.0.0.0",
         debug=True,
-        server_port=int(os.getenv("FRONTEND_PORT", 11184)),
+        server_port=int(os.getenv("FRONTEND_PORT", 11191)),
+        allowed_paths=["/home/leap/webui/LEAP_기능설명서.pdf"],
+        auth=None,
+        ssl_verify=False
     )

@@ -17,7 +17,7 @@ services:
         reservations:
           devices:
           - driver: nvidia
-            count: "all"
+            count: 2
             capabilities: [gpu]
     restart: unless-stopped
     #command: /bin/bash -c "source activate vllm && uvicorn evaluation.app:app --host 0.0.0.0 --port 11184 --reload"
